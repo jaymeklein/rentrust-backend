@@ -13,4 +13,5 @@ alembic = "*"
 python_version = "3.13"
 
 [scripts]
-dev = "uvicorn api.main:app --reload"
+dev = "fastapi dev api/main.py"
+backend = "fastapi run api/main.py --port 9013"

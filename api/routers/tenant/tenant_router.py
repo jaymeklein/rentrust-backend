@@ -1,8 +1,7 @@
-
 from fastapi import APIRouter, HTTPException
 from typing import List
-from api.schemas.tenant.tenant_scheme import TenantCreate, TenantResponse
-from api.services.tenant.tenant_service import TenantService
+from schemas.tenant.tenant_scheme import TenantCreate, TenantResponse
+from services.tenant.tenant_service import TenantService
 
 router = APIRouter()
 
