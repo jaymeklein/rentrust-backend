@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from routers.tenant import tenant_router
+from api.routers.tenant import tenant_router
 
 app = FastAPI()
 

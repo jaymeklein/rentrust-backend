@@ -6,6 +6,7 @@ class Tenant(BaseModel):
     name: str
     email: EmailStr
     phone: str
+    emergency_contact: str | None
 
     model_config = {
         "from_attributes": True
@@ -13,8 +14,9 @@ class Tenant(BaseModel):
 
 
 class TenantCreate(Tenant):
-    pass
+    id: None
 
 
 class TenantResponse(Tenant):
-    pass
+    id: PositiveInt 
+

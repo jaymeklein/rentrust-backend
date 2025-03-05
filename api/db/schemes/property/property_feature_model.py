@@ -3,7 +3,7 @@ from __future__ import annotations
 from sqlalchemy import Column, ForeignKey, Integer
 from sqlalchemy.orm import relationship
 
-from models.base.base import Base
+from api.db.schemes.base.base import Base
 
 
 class PropertyFeature(Base):

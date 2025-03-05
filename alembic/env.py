@@ -4,15 +4,15 @@ from alembic import context
 from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 
-from models.agents.agent_model import Agent  # noqa
-from models.base.base import Base
-from models.owner.owner_model import Owner  # noqa
-from models.property.feature_model import Feature  # noqa
-from models.property.property_address_model import PropertyAddress  # noqa
-from models.property.property_feature_model import PropertyFeature  # noqa
-from models.property.property_model import Property  # noqa
-from models.real_estate_company.real_estate_company_model import RealEstateCompany  # noqa
-from models.tenant.tenant_model import Tenant  # noqa
+from api.db.schemes.base.base import Base
+from api.db.schemes.agents.agent_model import Agent                                         # noqa
+from api.db.schemes.owner.owner_model import Owner                                          # noqa
+from api.db.schemes.property.feature_model import Feature                                   # noqa
+from api.db.schemes.property.property_address_model import PropertyAddress                  # noqa
+from api.db.schemes.property.property_feature_model import PropertyFeature                  # noqa
+from api.db.schemes.property.property_model import Property                                 # noqa
+from api.db.schemes.real_estate_company.real_estate_company_model import RealEstateCompany  # noqa
+from api.db.schemes.tenant.tenant_model import Tenant                                       # noqa
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

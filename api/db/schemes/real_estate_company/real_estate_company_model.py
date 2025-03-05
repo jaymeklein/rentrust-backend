@@ -3,9 +3,9 @@ from __future__ import annotations
 from sqlalchemy import Column, Integer, String
 from sqlalchemy.orm import relationship
 
-from models.agents.agent_model import Agent
-from models.base.base import Base
-from models.property.property_model import Property
+from api.db.schemes.agents.agent_model import Agent
+from api.db.schemes.base.base import Base
+from api.db.schemes.property.property_model import Property
 
 
 class RealEstateCompany(Base):

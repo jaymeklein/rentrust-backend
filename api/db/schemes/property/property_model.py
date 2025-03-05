@@ -5,8 +5,8 @@ from datetime import datetime
 from sqlalchemy import Column, DateTime, Enum, Float, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 
-from models.base.base import Base
-from utils.property_enums import PropertyStatuses, PropertyTypes
+from api.db.schemes.base.base import Base
+from api.utils.property_enums import PropertyStatuses, PropertyTypes
 
 
 class Property(Base):

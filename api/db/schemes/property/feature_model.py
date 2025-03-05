@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from sqlalchemy import Column, Integer, String
 
-from models.base.base import Base
+from api.db.schemes.base.base import Base
 
 
 class Feature(Base):
