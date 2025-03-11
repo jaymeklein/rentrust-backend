@@ -12,7 +12,7 @@ from db.schemas.property.property_address_model import PropertyAddress          
 from db.schemas.property.property_feature_model import PropertyFeature                  # noqa
 from db.schemas.property.property_model import Property                                 # noqa
 from db.schemas.real_estate_company.real_estate_company_model import RealEstateCompany  # noqa
-from db.schemas.tenant.tenant_model import Tenant                                       # noqa
+from db.schemas.tenant.tenant_schema import Tenant                                       # noqa
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

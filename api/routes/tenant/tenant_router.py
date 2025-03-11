@@ -22,10 +22,7 @@ async def list_tenants():
 
 @router.get("/{tenant_id}", response_model=TenantResponse)
 async def get_tenant(tenant_id: int):
-	tenant = tenant_controller.get_tenant(tenant_id)
-	if not tenant:
-		raise HTTPException(status_code=404, detail="Tenant not found")
-	return tenant
+	return tenant_controller.get_tenant(tenant_id)
 
 
 @router.put("/{tenant_id}", response_model=TenantResponse)

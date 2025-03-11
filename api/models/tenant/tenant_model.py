@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 
 from db.engine import get_engine
 from api.schemas.tenant_schema import TenantCreate
-from db.schemas.tenant.tenant_model import Tenant
+from db.schemas.tenant.tenant_schema import Tenant
 
 
 class TenantModel:

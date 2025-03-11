@@ -12,3 +12,6 @@ class TenantController:
 
 	def get_all_tenants(self) -> List[Tenant]:
 		return self.tenant_service.get_all_tenants()
+
+	def get_tenant(self, tenant_id: int) -> Tenant:
+		return self.tenant_service.get_tenant(tenant_id)
