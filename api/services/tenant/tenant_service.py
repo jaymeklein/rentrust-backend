@@ -1,3 +1,5 @@
+from typing import List, Type
+
 from api.exceptions.tenant_exceptions import TenantAlreadyExistsException
 from api.models.tenant.tenant_model import TenantModel
 from api.schemas.tenant_schema import Tenant, TenantCreate
@@ -14,3 +16,7 @@ class TenantService:
 
 		tenant = self.tenant_model.create_tenant(tenant_create).__dict__
 		return Tenant(**tenant)
+
+	def get_all_tenants(self) -> List[Tenant]:
+		tenants = self.tenant_model.get_all_tenants()
+		return [Tenant(**tenant.__dict__) for tenant in tenants]

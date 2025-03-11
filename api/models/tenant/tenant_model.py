@@ -15,6 +15,7 @@ class TenantModel:
 			return (
 				session
 				.query(Tenant)
+				.filter(Tenant.status)
 				.all()
 			)
 
@@ -59,6 +60,6 @@ class TenantModel:
 			.query(Tenant)
 			.filter(
 				or_(Tenant.email == tenant_data.email,
-					 Tenant.phone == tenant_data.phone,
-					 Tenant.id_document == tenant_data.id_document)
+					Tenant.phone == tenant_data.phone,
+					Tenant.id_document == tenant_data.id_document)
 			)).first()
