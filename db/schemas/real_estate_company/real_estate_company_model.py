@@ -1,11 +1,11 @@
-from __future__ import annotations
+
 
 from sqlalchemy import Column, Integer, String
 from sqlalchemy.orm import relationship
 
-from api.db.schemes.agents.agent_model import Agent
-from api.db.schemes.base.base import Base
-from api.db.schemes.property.property_model import Property
+from db.schemas.agents.agent_model import Agent
+from db.schemas.base.base import Base
+from db.schemas.property.property_model import Property
 
 
 class RealEstateCompany(Base):

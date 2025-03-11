@@ -1,8 +1,8 @@
-from __future__ import annotations
+
 
 from sqlalchemy import Column, Integer, String
 
-from api.db.schemes.base.base import Base
+from db.schemas.base.base import Base
 
 
 class Feature(Base):

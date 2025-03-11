@@ -1,9 +1,8 @@
-from __future__ import annotations
 
 from sqlalchemy import Column, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 
-from api.db.schemes.base.base import Base
+from db.schemas.base.base import Base
 
 
 class Agent(Base):
