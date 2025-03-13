@@ -3,8 +3,8 @@ from typing import Optional
 from pydantic import BaseModel, PositiveInt, EmailStr
 
 
-class Tenant(BaseModel):
-	id: PositiveInt
+class TenantSchema(BaseModel):
+	id: Optional[PositiveInt] = None
 	name: str
 	id_document: str
 	email: EmailStr
@@ -17,9 +17,5 @@ class Tenant(BaseModel):
 	}
 
 
-class TenantCreate(Tenant):
-	id: None
-
-
-class TenantResponse(Tenant):
+class TenantSchemaResponse(TenantSchema):
 	id: PositiveInt
