@@ -4,7 +4,7 @@ from typing import List
 from pydantic import PositiveInt
 
 from api.controllers.tenant.tenant_controller import TenantController
-from api.schemas.tenant_schema import TenantSchema, TenantSchemaResponse
+from api.schemas.tenant_schema import TenantSchema, TenantSchemaResponse, TenantDeleteResponse
 
 router = APIRouter()
 
@@ -32,7 +32,6 @@ async def update_tenant(tenant_id: PositiveInt, tenant_data: TenantSchema):
 	return tenant_controller.update_tenant(tenant_id, tenant_data)
 
 
-@router.delete("/{tenant_id}")
+@router.delete("/{tenant_id}", response_model=TenantDeleteResponse)
 async def delete_tenant(tenant_id: PositiveInt):
-	tenant_controller.delete_tenant(tenant_id)
-	return {"message": "Tenant deleted successfully"}
+	return tenant_controller.delete_tenant(tenant_id)

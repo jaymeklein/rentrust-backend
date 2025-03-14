@@ -19,3 +19,8 @@ class TenantSchema(BaseModel):
 
 class TenantSchemaResponse(TenantSchema):
 	id: PositiveInt
+
+
+class TenantDeleteResponse(BaseModel):
+	deleted: bool
+	error: Optional[str] = None

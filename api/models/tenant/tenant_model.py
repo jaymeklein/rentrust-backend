@@ -7,12 +7,12 @@ from sqlalchemy.orm import Session
 
 from api.exceptions.tenant_exceptions import TenantNotFoundException
 from db.engine import get_engine
-from api.schemas.tenant_schema import TenantSchema as TenantSchema
+from api.schemas.tenant_schema import TenantSchema as TenantSchema, TenantDeleteResponse
 from db.schemas.tenant.tenant_schema import Tenant
 
 
 class TenantModel:
-	def get_all_tenants(self) -> List[Type[Tenant]]:
+	def get_all_tenants(self) -> list[Type[Tenant]]:
 		with Session(get_engine()) as session:
 			return (
 				session
@@ -33,7 +33,7 @@ class TenantModel:
 		with Session(get_engine()) as session:
 			return session.query(Tenant).filter(Tenant.id == tenant_id).first()
 
-	def update_tenant(self, tenant_id: PositiveInt, tenant_data: TenantSchema) -> Type[Tenant]:
+	def update_tenant(self, tenant_id: PositiveInt, tenant_data: TenantSchema) -> Type[Tenant] | None:
 		with Session(get_engine()) as session:
 			tenant = session.query(Tenant).filter(Tenant.id == tenant_id).first()
 			if not tenant:
@@ -49,21 +49,31 @@ class TenantModel:
 
 		return tenant
 
-	def delete_tenant(self, tenant_id: PositiveInt):
-		tenant = self.get_tenant(tenant_id)
-		if not tenant:
-			raise HTTPException(status_code=404, detail="Tenant not found")
+	def delete_tenant(self, tenant: Tenant) -> TenantDeleteResponse:
+		tenant_delete_response = TenantDeleteResponse(deleted=True)
 
-		with Session(get_engine()) as session:
-			session.delete(tenant)
-			session.commit()
+		try:
+			with Session(get_engine()) as session:
+				session.delete(tenant)
+				session.commit()
+				return tenant_delete_response
 
-	def tenant_exists(self, tenant_data: TenantSchema) -> list[Type[Tenant]] | None:
-		with (Session(get_engine()) as session):
-			return (session
-			.query(Tenant)
-			.filter(
-				or_(Tenant.email == tenant_data.email,
-					Tenant.phone == tenant_data.phone,
-					Tenant.id_document == tenant_data.id_document)
-			)).all()
+		except Exception as e:
+			tenant_delete_response.error = str(e)
+			tenant_delete_response.deleted = False
+			return tenant_delete_response
+
+
+
+	def tenant_exists(self, tenant_data: TenantSchema) -> list[Type[Tenant]]:
+		with (
+			Session(get_engine()) as session):
+			return (
+				session
+				.query(Tenant)
+				.filter(
+					or_(Tenant.email == tenant_data.email,
+						Tenant.phone == tenant_data.phone,
+						Tenant.id_document == tenant_data.id_document)
+				)
+			).all()
