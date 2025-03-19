@@ -1,4 +1,4 @@
-from typing import List, Type
+from typing import Type
 
 from pydantic.v1 import PositiveInt
 
