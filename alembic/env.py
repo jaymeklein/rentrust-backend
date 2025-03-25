@@ -5,14 +5,14 @@ from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 
 from db.schemas.base.base import Base
-from db.schemas.agents.agent_model import Agent                                         # noqa
-from db.schemas.owner.owner_model import Owner                                          # noqa
-from db.schemas.property.feature_model import Feature                                   # noqa
-from db.schemas.property.property_address_model import PropertyAddress                  # noqa
-from db.schemas.property.property_feature_model import PropertyFeature                  # noqa
-from db.schemas.property.property_model import Property                                 # noqa
-from db.schemas.real_estate_company.real_estate_company_model import RealEstateCompany  # noqa
-from db.schemas.tenant.tenant_schema import Tenant                                       # noqa
+from db.schemas.agents.agent_schema import AgentSchema                                         # noqa
+from db.schemas.owner.owner_schema import OwnerSchema                                          # noqa
+from db.schemas.property.feature_schema import FeatureSchema                                   # noqa
+from db.schemas.property.property_address_schema import PropertyAddressSchema                  # noqa
+from db.schemas.property.property_feature_schema import PropertyFeatureSchema                  # noqa
+from db.schemas.property.property_schema import PropertySchema                                 # noqa
+from db.schemas.real_estate_company.real_estate_company_schema import RealEstateCompanySchema  # noqa
+from db.schemas.tenant.tenant_schema import TenantSchema                                       # noqa
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

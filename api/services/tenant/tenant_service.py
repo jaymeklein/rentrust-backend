@@ -33,7 +33,7 @@ class TenantService:
 	def update_tenant(self, tenant_id: PositiveInt, tenant_data: TenantSchema) -> Type[Tenant] | None:
 		all_tenants = self.tenant_model.tenant_exists(tenant_data)
 		if len(all_tenants) > 1:
-			raise TenantAlreadyExistsException(f"Tenant with specified data already exists")
+			raise TenantAlreadyExistsException("Tenant with specified data already exists")
 
 		return self.tenant_model.update_tenant(tenant_id, tenant_data)
 
