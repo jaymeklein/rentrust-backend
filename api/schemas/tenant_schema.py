@@ -1,14 +1,14 @@
 from typing import Optional
 
-from pydantic import BaseModel, PositiveInt, EmailStr
+from pydantic import BaseModel, PositiveInt, EmailStr, Field
 
 
 class TenantSchema(BaseModel):
 	id: Optional[PositiveInt] = None
-	name: str
+	name: str = Field(..., min_length=5)
 	id_document: str
 	email: EmailStr
-	phone: str
+	phone: str = Field(...)
 	emergency_contact: Optional[str]
 	status: Optional[bool] = True
 
