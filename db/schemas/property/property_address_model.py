@@ -2,10 +2,10 @@
 
 from sqlalchemy import Column, Integer, String
 
-from db.schemas.base.base import Base
+from db.schemas.base.base import basemodel
 
 
-class PropertyAddress(Base):
+class PropertyAddress(basemodel):
     __tablename__ = "property_addresses"
 
     id = Column(Integer, primary_key=True, index=True)

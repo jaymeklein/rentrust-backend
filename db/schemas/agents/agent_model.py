@@ -2,10 +2,10 @@
 from sqlalchemy import Column, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 
-from db.schemas.base.base import Base
+from db.schemas.base.base import basemodel
 
 
-class Agent(Base):
+class Agent(basemodel):
     __tablename__ = "agents"
 
     id = Column(Integer, primary_key=True, index=True)

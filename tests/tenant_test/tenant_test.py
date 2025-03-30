@@ -1,93 +1,102 @@
-import pytest
-from pydantic import ValidationError
-from sqlalchemy.orm import Session
+from datetime import datetime
 
+import pytest
+from faker import Faker
+
+from pydantic import ValidationError
+
+from api.models.tenant.tenant_model import TenantModel
 from api.schemas.tenant_schema import TenantSchema
 from db.schemas.tenant.tenant_schema import Tenant as DBTenant
-from tests.config import db_session
+from tests.config import db_session, build_valid_tenant_data, build_invalid_tenant_data, remove_id
+
+TENANT_MODEL = TenantModel(testing=True)
+fake = Faker()
+
+def test_create_tenant_schema():
+	"""Tests the tenant schema creation
+
+	*Pydantic auto validates column types
+	"""
+	tenant_data = build_valid_tenant_data()
+	tenant_schema = TenantSchema(**tenant_data)
+	assert tenant_schema.model_dump() == tenant_data
+
+def test_create_tenant_database_model():
+	"""Tests the tenant model creation"""
+	tenant_data = build_valid_tenant_data()
+	tenant_database_model = DBTenant(**tenant_data)
+	assert tenant_database_model.as_dict() == tenant_data
+
+def test_insert_tenant():
+	"""Tests if the data inserted is equal to the data sent to be inserted"""
+	tenant_data = build_valid_tenant_data()
+	tenant_schema = TenantSchema(**tenant_data)
+	inserted_tenant = TENANT_MODEL.create_tenant(tenant_schema)
+	inserted_tenant = remove_id(inserted_tenant.as_dict())
+	tenant_data = remove_id(tenant_data)
+	assert inserted_tenant == tenant_data, "Inserted tenant and tenant data should be equal."
+
+def test_insert_tenant_persistence():
+	"""Tests if the inserted tenant is persisted in the DB"""
+	tenant_data = build_valid_tenant_data()
+	tenant_schema = TenantSchema(**tenant_data)
+	tenant_schema.email = 'email@tenant.com'
+	tenant_schema.id_document = str(datetime.now())
+	inserted_tenant = TENANT_MODEL.create_tenant(tenant_schema)
+	persisted_tenant = TENANT_MODEL.get_tenant(tenant_id=inserted_tenant.id)
+
+	assert persisted_tenant is not None, "Persisted tenant should not be None."
+	assert inserted_tenant.id == persisted_tenant.id, "Inserted tenant ID and persisted tenant ID should be equal."
 
 
-def build_tenant_data():
-	# noinspection PyTypeChecker
-	return dict({
-		"name"             : "Dummy Tenant",
-		"id_document"      : "dummy_id_document_123",
-		"email"            : "dummy_tenant_email@tenant.com",
-		"phone"            : "+00 (00) 0000-0000",
-		"emergency_contact": "+11 (11) 1111-1111",
-		"status"           : True
-	})
+def test_invalid_email():
+	invalid_data = build_valid_tenant_data()
+	invalid_mail = "invalid-email@@gmail.com"
+	invalid_data['email'] = invalid_mail
 
+	with pytest.raises(ValidationError) as excinfo:
+		TenantSchema(**invalid_data)
 
-def test_create_tenant_successful(db_session: Session):
-	"""Tests pydantic typing, SQLAlchemy model creation, database insertion and persistence"""
+	assert 'value is not a valid email address' in str(excinfo.value), f"{invalid_mail} should not be considered valid."
 
-	def test_create_tenant_schema(tenant: dict):
-		# Any malformed data will be handled by pydantic
-		return TenantSchema(**tenant)
+def test_empty_email():
+	invalid_data = build_invalid_tenant_data()
+	invalid_data['email'] = ''
 
-	def test_create_tenant_db_model(schema: TenantSchema):
-		return DBTenant(**schema.model_dump())
+	with pytest.raises(ValidationError) as excinfo:
+		TenantSchema(**invalid_data)
 
-	def test_insert_tenant(model: DBTenant):
-		db_session.add(model)
-		db_session.commit()
-		db_session.flush()
-		return model
+	assert 'value is not a valid email address' in str(excinfo.value)
 
-	def test_tenant_persistence(model: DBTenant):
-		found_tenant = (
-			db_session
-			.query(DBTenant)
-			.filter(DBTenant.id == model.id)
-			.first()
-		)
+def test_empty_name():
+	invalid_data = build_invalid_tenant_data()
+	invalid_data['name'] = ''
 
-		assert found_tenant == model
+	with pytest.raises(ValidationError) as excinfo:
+		TenantSchema(**invalid_data)
 
-	tenant_data = build_tenant_data()
-	tenant_schema = test_create_tenant_schema(tenant_data)
-	tenant_model = test_create_tenant_db_model(tenant_schema)
-	db_tenant = test_insert_tenant(tenant_model)
-	test_tenant_persistence(db_tenant)
+	assert "at least 5 characters [type=string_too_short, input_value=''" in str(excinfo.value)
 
-
-def test_create_tenant_error():
-	def test_invalid_email():
-		invalid_data = build_tenant_data()
-		invalid_data['email'] = "invalid-email@@gmail.com"
-
-		with pytest.raises(ValidationError) as excinfo:
-			TenantSchema(**invalid_data)
-
-		assert 'value is not a valid email address' in str(excinfo.value)
-
-	def test_empty_email():
-		invalid_data = build_tenant_data()
-		invalid_data['email'] = ''
-
-		with pytest.raises(ValidationError) as excinfo:
-			TenantSchema(**invalid_data)
-
-		assert 'value is not a valid email address' in str(excinfo.value)
-
-	def test_empty_name():
-		invalid_data = build_tenant_data()
-		invalid_data['name'] = ''
-
-		with pytest.raises(ValidationError) as excinfo:
-			TenantSchema(**invalid_data)
-
-		assert "at least 5 characters [type=string_too_short, input_value=''" in str(excinfo.value)
-
-	test_invalid_email()
-	test_empty_email()
-	test_empty_name()
 
 
 def test_get_all_tenants():
-	"""Not yet implemented"""
-	pass
+	TENANT_MODEL.truncate_tenants()
+
+	tenants = [build_valid_tenant_data(random=True) for _ in range(5)]
+	tenants = [TenantSchema(**tenant) for tenant in tenants]
+	created_tenants = []
+
+	for tenant in tenants:
+		created_tenant = TENANT_MODEL.create_tenant(tenant)
+		created_tenants.append(created_tenant)
+
+	all_active_tenants = TENANT_MODEL.get_all_tenants()
+	all_tenants = TENANT_MODEL.get_all_tenants(get_inactive=True)
+	all_active = all(set(tenant.status for tenant in all_active_tenants))
+
+	assert all_active, "Should only query for active tenants."
+	assert len(all_tenants) == len(tenants), "Length of inserted tenants should be equal to queried tenants."
 
 
 def test_get_tenant():

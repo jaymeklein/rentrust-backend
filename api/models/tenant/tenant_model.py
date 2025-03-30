@@ -11,34 +11,38 @@ from db.schemas.tenant.tenant_schema import Tenant
 
 
 class TenantModel:
+	testing: bool = False
 
-	@classmethod
+	def __init__(self, testing: bool = False):
+		print(f"is testing: {testing}")
+		self.testing = testing
+
 	@with_session
-	def get_all_tenants(cls, session: Session) -> list[Type[Tenant]]:
-		return (
+	def get_all_tenants(self, session: Session, get_inactive: bool = False) -> list[Type[Tenant]]:
+		query = (
 			session
 			.query(Tenant)
-			.filter(Tenant.status)
-			.all()
 		)
 
-	@classmethod
+		if not get_inactive:
+			return query.filter(Tenant.status).all()
+
+		return query.all()
+
 	@with_session
-	def create_tenant(cls, session: Session, tenant_data: TenantSchema) -> Tenant:
+	def create_tenant(self, session: Session, tenant_data: TenantSchema) -> Tenant:
 		new_tenant = Tenant(**tenant_data.__dict__)
 		session.add(new_tenant)
 		session.commit()
 		session.refresh(new_tenant)
 		return new_tenant
 
-	@classmethod
 	@with_session
-	def get_tenant(cls, session: Session, tenant_id: PositiveInt) -> Tenant | None:
+	def get_tenant(self, session: Session, tenant_id: PositiveInt) -> Tenant | None:
 		return session.query(Tenant).filter(Tenant.id == tenant_id).first()
 
-	@classmethod
 	@with_session
-	def update_tenant(cls, session: Session, tenant_id: PositiveInt, tenant_data: TenantSchema) -> Type[Tenant] | None:
+	def update_tenant(self, session: Session, tenant_id: PositiveInt, tenant_data: TenantSchema) -> Type[Tenant] | None:
 		tenant = session.query(Tenant).filter(Tenant.id == tenant_id).first()
 		if not tenant:
 			raise TenantNotFoundException(f"Tenant with id {tenant_id} not found")
@@ -53,9 +57,8 @@ class TenantModel:
 
 		return tenant
 
-	@classmethod
 	@with_session
-	def delete_tenant(cls, session: Session, tenant: Tenant) -> TenantDeleteResponse:
+	def delete_tenant(self, session: Session, tenant: Tenant) -> TenantDeleteResponse:
 		tenant_delete_response = TenantDeleteResponse(deleted=True)
 
 		try:
@@ -68,9 +71,8 @@ class TenantModel:
 			tenant_delete_response.deleted = False
 			return tenant_delete_response
 
-	@classmethod
 	@with_session
-	def tenant_exists(cls, session: Session, tenant_data: TenantSchema) -> list[Type[Tenant]]:
+	def tenant_exists(self, session: Session, tenant_data: TenantSchema) -> list[Type[Tenant]]:
 		return (
 			session
 			.query(Tenant)
@@ -80,3 +82,11 @@ class TenantModel:
 					Tenant.id_document == tenant_data.id_document)
 			)
 		).all()
+
+	@with_session
+	def truncate_tenants(self, session: Session) -> None:
+		if not self.testing:
+			raise ValueError("Cannot truncate tenants without testing mode")
+
+		session.query(Tenant).delete()
+		session.commit()

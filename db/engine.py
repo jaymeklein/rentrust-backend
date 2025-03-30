@@ -1,19 +1,19 @@
+from contextlib import contextmanager
 from os import getenv
-from typing import Any, Generator
+from typing import Generator
 
 from dotenv import load_dotenv
 from sqlalchemy import create_engine, URL, Engine
 from sqlalchemy.orm import sessionmaker, Session
 
 from db.models import SqlConnectionData
+from db.schemas.base.base import basemodel
+from db.schemas.tenant.tenant_schema import Tenant
 
 load_dotenv()
 
 
 class MySQLConnection:
-	__session: Session = None
-	__engine: Engine = None
-
 	def __init__(self, connection_data: SqlConnectionData):
 		self.host = connection_data.host
 		self.port = connection_data.port
@@ -26,33 +26,42 @@ class MySQLConnection:
 		if not all([self.user, self.port, self.host, self.password, self.database]) and not self.is_sqlite:
 			raise ValueError("Missing SQL connection parameter(s)")
 
-		if self.__session is None:
-			self.create_session()
-
-	def create_session(self) -> None:
-
-		url_obj = self.url
-		if not self.is_sqlite:
-			url_obj = URL.create(
+		self._engine = create_engine(
+			self.url if self.is_sqlite else URL.create(
 				"mysql",
 				username=self.user,
 				password=self.password,
 				host=self.host,
 				database=self.database,
 				port=self.port,
-			)
+			),
+			echo=False,
+			future=True
+		)
 
-		self.__engine = create_engine(url_obj, echo=False, future=True)
-		session = sessionmaker(bind=self.__engine, future=True)
-		self.__session = session()
+		basemodel.metadata.create_all(self._engine)
+		self._session_factory = sessionmaker(
+			bind=self._engine,
+			future=True,
+			expire_on_commit=False
+		)
+
+	@contextmanager
+	def session(self) -> Generator[Session, None, None]:
+		"""Provide a transactional scope around a series of operations."""
+		session = self._session_factory()
+		try:
+			yield session
+			session.commit()
+		except Exception:
+			session.rollback()
+			raise
+		finally:
+			session.close()
 
 	@property
-	def get_session(self) -> Session:
-		return self.__session
-
-	@property
-	def get_engine(self) -> Engine:
-		return self.__engine
+	def engine(self) -> Engine:
+		return self._engine
 
 
 def generate_sql_connection_data(testing: bool = False) -> SqlConnectionData:
@@ -71,22 +80,17 @@ def generate_sql_connection_data(testing: bool = False) -> SqlConnectionData:
 	)
 
 
-def start_mysql_connection(testing: bool = False) -> Session:
+def start_mysql_connection(testing: bool = False) -> MySQLConnection:
 	connection_data = generate_sql_connection_data(testing)
-	sql_connection = MySQLConnection(connection_data)
-	return sql_connection.get_session
+	return MySQLConnection(connection_data)
 
 
-sql_session = start_mysql_connection()
-sql_test_session = start_mysql_connection(testing=True)
+# Initialize connections
+sql_connection = start_mysql_connection()
 
 
-def get_session(testing: bool = False) -> Generator[Session, Any, None]:
-	database = sql_session
-	if testing:
-		database = sql_test_session
-
-	try:
-		yield database
-	finally:
-		database.close()
+@contextmanager
+def get_session() -> Generator[Session, None, None]:
+	"""Get a database session with proper context management."""
+	with sql_connection.session() as session:
+		yield session

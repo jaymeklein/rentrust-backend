@@ -2,10 +2,10 @@
 
 from sqlalchemy import Column, Integer, String
 
-from db.schemas.base.base import Base
+from db.schemas.base.base import basemodel
 
 
-class Feature(Base):
+class Feature(basemodel):
     __tablename__ = "features"
 
     id = Column(Integer, primary_key=True, index=True)

@@ -3,11 +3,11 @@ from datetime import datetime
 from sqlalchemy import Column, DateTime, Enum, Float, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 
-from db.schemas.base.base import Base
+from db.schemas.base.base import basemodel
 from api.utils.property_enums import PropertyStatuses, PropertyTypes
 
 
-class Property(Base):
+class Property(basemodel):
 	__tablename__ = "properties"
 
 	# IDs

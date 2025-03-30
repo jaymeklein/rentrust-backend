@@ -4,11 +4,11 @@ from sqlalchemy import Column, Integer, String
 from sqlalchemy.orm import relationship
 
 from db.schemas.agents.agent_model import Agent
-from db.schemas.base.base import Base
+from db.schemas.base.base import basemodel
 from db.schemas.property.property_model import Property
 
 
-class RealEstateCompany(Base):
+class RealEstateCompany(basemodel):
     __tablename__ = "real_estate_companies"
 
     id = Column(Integer, primary_key=True, index=True)

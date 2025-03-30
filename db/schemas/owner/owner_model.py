@@ -3,10 +3,10 @@
 from sqlalchemy import Column, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 
-from db.schemas.base.base import Base
+from db.schemas.base.base import basemodel
 
 
-class Owner(Base):
+class Owner(basemodel):
     __tablename__ = "owners"
 
     id = Column(Integer, primary_key=True, index=True)
