@@ -62,7 +62,7 @@ class TenantModel:
 		tenant_delete_response = TenantDeleteResponse(deleted=True)
 
 		try:
-			session.delete(tenant)
+			session.query(Tenant).filter_by(id=tenant.id).delete()
 			session.commit()
 			return tenant_delete_response
 

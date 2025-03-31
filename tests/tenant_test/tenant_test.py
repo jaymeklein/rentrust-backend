@@ -2,16 +2,21 @@ from datetime import datetime
 
 import pytest
 from faker import Faker
-
 from pydantic import ValidationError
 
 from api.models.tenant.tenant_model import TenantModel
 from api.schemas.tenant_schema import TenantSchema
 from db.schemas.tenant.tenant_schema import Tenant as DBTenant
-from tests.config import db_session, build_valid_tenant_data, build_invalid_tenant_data, remove_id
+from tests.config import build_valid_tenant_data, build_invalid_tenant_data, remove_id
 
 TENANT_MODEL = TenantModel(testing=True)
 fake = Faker()
+
+
+@pytest.fixture(autouse=True)
+def truncate_tenants():
+	TENANT_MODEL.truncate_tenants()
+
 
 def test_create_tenant_schema():
 	"""Tests the tenant schema creation
@@ -22,11 +27,13 @@ def test_create_tenant_schema():
 	tenant_schema = TenantSchema(**tenant_data)
 	assert tenant_schema.model_dump() == tenant_data
 
+
 def test_create_tenant_database_model():
 	"""Tests the tenant model creation"""
 	tenant_data = build_valid_tenant_data()
 	tenant_database_model = DBTenant(**tenant_data)
 	assert tenant_database_model.as_dict() == tenant_data
+
 
 def test_insert_tenant():
 	"""Tests if the data inserted is equal to the data sent to be inserted"""
@@ -36,6 +43,7 @@ def test_insert_tenant():
 	inserted_tenant = remove_id(inserted_tenant.as_dict())
 	tenant_data = remove_id(tenant_data)
 	assert inserted_tenant == tenant_data, "Inserted tenant and tenant data should be equal."
+
 
 def test_insert_tenant_persistence():
 	"""Tests if the inserted tenant is persisted in the DB"""
@@ -51,6 +59,7 @@ def test_insert_tenant_persistence():
 
 
 def test_invalid_email():
+	"""Tests for invalid email raise"""
 	invalid_data = build_valid_tenant_data()
 	invalid_mail = "invalid-email@@gmail.com"
 	invalid_data['email'] = invalid_mail
@@ -60,7 +69,9 @@ def test_invalid_email():
 
 	assert 'value is not a valid email address' in str(excinfo.value), f"{invalid_mail} should not be considered valid."
 
+
 def test_empty_email():
+	"""Tests for empty email raise"""
 	invalid_data = build_invalid_tenant_data()
 	invalid_data['email'] = ''
 
@@ -69,7 +80,9 @@ def test_empty_email():
 
 	assert 'value is not a valid email address' in str(excinfo.value)
 
+
 def test_empty_name():
+	"""Tests for empty name raise"""
 	invalid_data = build_invalid_tenant_data()
 	invalid_data['name'] = ''
 
@@ -79,9 +92,8 @@ def test_empty_name():
 	assert "at least 5 characters [type=string_too_short, input_value=''" in str(excinfo.value)
 
 
-
 def test_get_all_tenants():
-	TENANT_MODEL.truncate_tenants()
+	"""Tests for getting all tenants"""
 
 	tenants = [build_valid_tenant_data(random=True) for _ in range(5)]
 	tenants = [TenantSchema(**tenant) for tenant in tenants]
@@ -99,21 +111,45 @@ def test_get_all_tenants():
 	assert len(all_tenants) == len(tenants), "Length of inserted tenants should be equal to queried tenants."
 
 
-def test_get_tenant():
-	"""Not yet implemented"""
-	pass
-
-
 def test_update_tenant():
-	"""Not yet implemented"""
-	pass
+	"""Tests for updating a tenant"""
+
+	tenant_data = build_valid_tenant_data()
+	tenant_schema = TenantSchema(**tenant_data)
+	inserted_tenant = TENANT_MODEL.create_tenant(tenant_schema)
+
+	new_tenant_data = build_valid_tenant_data(random=True)
+	new_tenant_schema = TenantSchema(**new_tenant_data)
+	updated_tenant = TENANT_MODEL.update_tenant(inserted_tenant.id, new_tenant_schema)
+
+	assert inserted_tenant.id == updated_tenant.id, "Inserted tenant and updated tenant should have the same ID."
+	assert inserted_tenant.as_dict() != updated_tenant.as_dict(), "Inserted tenant and updated tenant should not be equal."
+	assert set(inserted_tenant.__dict__.keys()) == set(
+		updated_tenant.__dict__.keys()), "Inserted tenant and updated tenant should have the same attributes."
 
 
 def test_delete_tenant():
-	"""Not yet implemented"""
-	pass
+	"""Tests for deleting a tenant"""
+	tenant_data = build_valid_tenant_data()
+	tenant_schema = TenantSchema(**tenant_data)
+
+	inserted_tenant = TENANT_MODEL.create_tenant(tenant_schema)
+	deleted_tenant = TENANT_MODEL.delete_tenant(inserted_tenant)
+
+	assert deleted_tenant.deleted, "Deleted tenant should have deleted status as True."
+	assert deleted_tenant.error is None, "Deleted tenant should not have any errors."
 
 
 def test_tenant_exists():
-	"""Not yet implemented"""
-	pass
+	"""Tests for tenant_exists method"""
+	tenant_data = build_valid_tenant_data()
+	tenant_schema = TenantSchema(**tenant_data)
+	TENANT_MODEL.create_tenant(tenant_schema)
+
+	existing_tenants = TENANT_MODEL.tenant_exists(tenant_schema)
+	assert existing_tenants, "Tenant should exist after being inserted."
+
+	invalid_tenant_data = build_valid_tenant_data(random=True)
+	invalid_tenant_schema = TenantSchema(**invalid_tenant_data)
+	non_existing_tenants = TENANT_MODEL.tenant_exists(invalid_tenant_schema)
+	assert not non_existing_tenants, "Tenant should not exist after being inserted with invalid data."
