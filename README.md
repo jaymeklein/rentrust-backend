@@ -5,13 +5,3 @@
 	Model (api/models) - Interacts with the database;
  	Schema (api/schemas) - Defines Pydantic types;
    	Schema (db/schemas) - Defines the data structure as SQLAlchemy models;
-
-# Dynamically generate database tables
-	1. Inside `/rentrust`, generate the version file:
-	   ```bash
-	   alembic revision --autogenerate -m "MESSAGE"
-	   ```
-	2. Push changes to the database
-	   ```bash
-	   alembic upgrade head
-	   ```

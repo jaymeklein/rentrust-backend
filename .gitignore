@@ -80,3 +80,4 @@ cython_debug/
 alembic/versions/*
 /.idea/*
 base.db
+.zed/*
