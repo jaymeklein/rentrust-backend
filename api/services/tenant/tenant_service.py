@@ -2,9 +2,9 @@ from typing import List, Type
 
 from pydantic import PositiveInt
 
-from api.exceptions.tenant_exceptions import TenantAlreadyExistsException, TenantNotFoundException
+from api.exceptions.tenant_exceptions import EmptyTenantFilterException, TenantAlreadyExistsException, TenantNotFoundException
 from api.models.tenant.tenant_model import TenantModel
-from api.schemas.tenant_schema import TenantSchema, TenantDeleteResponse
+from api.schemas.tenant_schema import FilterTenantSchema, TenantSchema, TenantDeleteResponse
 from db.schemas.tenant.tenant_schema import Tenant
 
 
@@ -44,3 +44,10 @@ class TenantService:
 			raise TenantNotFoundException(f"Tenant with id {tenant_id} not found")
 
 		return self.tenant_model.delete_tenant(tenant)
+
+	def filter_tenants(self, tenant_data: FilterTenantSchema) -> List[Type[Tenant]]:
+		filter_data = tenant_data.model_dump()
+		if not any(filter_data.values()):
+			raise EmptyTenantFilterException("Tenant filter must have at least one value")
+      
+		return self.tenant_model.filter_tenants(tenant_data)

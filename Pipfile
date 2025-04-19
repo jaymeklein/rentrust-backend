@@ -13,6 +13,6 @@ alembic = "*"
 python_version = "3.13"
 
 [scripts]
-dev = "fastapi dev api/main.py"
+dev = "fastapi dev api/main.py --reload" 
 backend = "fastapi run api/main.py --port 9013"
 tests = "pytest -vv"

@@ -1,4 +1,4 @@
-from api.exceptions.base_exceptions import DatabaseDataValidationException
+from api.exceptions.base_exceptions import DatabaseDataValidationException, DataValidationException
 
 
 class TenantAlreadyExistsException(DatabaseDataValidationException):
@@ -7,4 +7,8 @@ class TenantAlreadyExistsException(DatabaseDataValidationException):
 
 class TenantNotFoundException(DatabaseDataValidationException):
 	""" Common base class for when a tenant does not exist. """
+	pass
+
+class EmptyTenantFilterException(DataValidationException):
+	""" Common base class for when a tenant filter is empty"""
 	pass

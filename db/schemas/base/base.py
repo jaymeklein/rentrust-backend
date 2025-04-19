@@ -19,5 +19,4 @@ class BaseModel(base):
 			if key not in exclude
 		}
 
-print('creating base')
 basemodel = BaseModel

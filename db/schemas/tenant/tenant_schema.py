@@ -13,5 +13,3 @@ class Tenant(basemodel):
 	phone = Column(String, nullable=True)
 	emergency_contact = Column(String(100))
 	status = Column(Boolean, nullable=False, default=True)
-
-print('import tenant')
