@@ -1,4 +1,3 @@
-from typing import Type
 
 from pydantic import PositiveInt
 from sqlalchemy import and_, or_
@@ -23,7 +22,7 @@ class TenantModel:
     @with_session
     def get_all_tenants(
         self, session: Session, get_inactive: bool = False
-    ) -> list[Type[Tenant]]:
+    ) -> list[Tenant]:
         query = session.query(Tenant)
 
         if not get_inactive:
@@ -46,7 +45,7 @@ class TenantModel:
     @with_session
     def update_tenant(
         self, session: Session, tenant_id: PositiveInt, tenant_data: TenantSchema
-    ) -> Type[Tenant] | None:
+    ) -> Tenant | None:
         tenant = session.query(Tenant).filter(Tenant.id == tenant_id).first()
         if not tenant:
             raise TenantNotFoundException(f"Tenant with id {tenant_id} not found")
@@ -78,7 +77,7 @@ class TenantModel:
     @with_session
     def tenant_exists(
         self, session: Session, tenant_data: TenantSchema
-    ) -> list[Type[Tenant]]:
+    ) -> list[Tenant]:
         return (
             session.query(Tenant).filter(
                 or_(
@@ -100,7 +99,7 @@ class TenantModel:
     @with_session
     def filter_tenants(
     self, session: Session, tenant_data: FilterTenantSchema
-    ) -> list[Type[Tenant]]:
+    ) -> list[Tenant]:
         query = session.query(Tenant)
         filters = []
 
@@ -111,7 +110,7 @@ class TenantModel:
             filters.append(Tenant.email == tenant_data.email)
 
         if tenant_data.name:
-            filters.append(Tenant.name.like(tenant_data.name))
+            filters.append(Tenant.name.like(f"%{tenant_data.name}%"))
 
         if tenant_data.id_document:
             filters.append(Tenant.id_document == tenant_data.id_document)
@@ -123,4 +122,3 @@ class TenantModel:
             filters.append(Tenant.emergency_contact == tenant_data.emergency_contact)
 
         return query.filter(and_(*filters)).all()
-        

@@ -17,7 +17,7 @@ class TenantSchema(BaseModel):
 
 class FilterTenantSchema(TenantSchema):
     id: Optional[PositiveInt] = None
-    name: Optional[str] = Field(None, min_length=5)
+    name: Optional[str] = Field(None)
     id_document: Optional[str] = None
     email: Optional[str] = None
     phone: Optional[str] = None
