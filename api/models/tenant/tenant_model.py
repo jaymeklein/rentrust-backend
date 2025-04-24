@@ -5,19 +5,14 @@ from sqlalchemy.orm import Session
 
 from api.decorators.inject_db_session import with_session
 from api.exceptions.tenant_exceptions import TenantNotFoundException
-from api.schemas.tenant_schema import FilterTenantSchema, TenantSchema as TenantSchema, TenantDeleteResponse
+from api.schemas.tenant.tenant_schema import SearchTenantSchema, TenantSchema as TenantSchema, TenantDeleteResponse
+from api.models.base.base_model import BaseModel
 from db.schemas.tenant.tenant_schema import Tenant
-from colorama import Fore, Style, Back
 
 
-class TenantModel:
-    testing: bool = False
-
-    def __init__(self, testing: bool = False):
-        if testing:
-            print(f"     {Fore.RED}{Back.WHITE} TEST MODE IS ON {Style.RESET_ALL}")
-
-        self.testing = testing
+class TenantModel(BaseModel):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
 
     @with_session
     def get_all_tenants(
@@ -98,7 +93,7 @@ class TenantModel:
 
     @with_session
     def filter_tenants(
-    self, session: Session, tenant_data: FilterTenantSchema
+    self, session: Session, tenant_data: SearchTenantSchema
     ) -> list[Tenant]:
         query = session.query(Tenant)
         filters = []

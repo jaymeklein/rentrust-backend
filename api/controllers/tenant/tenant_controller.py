@@ -2,13 +2,17 @@ from typing import Type
 
 from pydantic.v1 import PositiveInt
 
-from api.schemas.tenant_schema import FilterTenantSchema, TenantSchema, TenantDeleteResponse
+from api.schemas.tenant.tenant_schema import SearchTenantSchema, TenantSchema, TenantDeleteResponse
 from api.services.tenant.tenant_service import TenantService
 from db.schemas.tenant.tenant_schema import Tenant
+from api.controllers.base.base_controller import BaseController
 
 
-class TenantController:
+class TenantController(BaseController):
 	tenant_service = TenantService()
+
+	def __init__(self, **kwargs):
+		super().__init__(**kwargs)
 
 	def create_tenant(self, tenant_data: TenantSchema) -> Tenant:
 		return self.tenant_service.create_tenant(tenant_data)
@@ -25,5 +29,5 @@ class TenantController:
 	def delete_tenant(self, tenant_id: PositiveInt) -> TenantDeleteResponse:
 		return self.tenant_service.delete_tenant(tenant_id)
 
-	def filter_tenants(self, tenant_data: FilterTenantSchema) -> list[Type[Tenant]]:
-		return self.tenant_service.filter_tenants(tenant_data)
+	def search_tenants(self, tenant_data: SearchTenantSchema) -> list[Type[Tenant]]:
+		return self.tenant_service.search_tenants(tenant_data)

@@ -4,18 +4,22 @@ from pydantic import PositiveInt
 
 from api.exceptions.tenant_exceptions import EmptyTenantFilterException, TenantAlreadyExistsException, TenantNotFoundException
 from api.models.tenant.tenant_model import TenantModel
-from api.schemas.tenant_schema import FilterTenantSchema, TenantSchema, TenantDeleteResponse
+from api.schemas.tenant.tenant_schema import SearchTenantSchema, TenantSchema, TenantDeleteResponse
 from db.schemas.tenant.tenant_schema import Tenant
+from api.services.base.base_service import BaseService
 
 
-class TenantService:
+class TenantService(BaseService):
 	tenant_model = TenantModel()
+
+	def __init__(self, **kwargs):
+		super().__init__(**kwargs)
 
 	def create_tenant(self, tenant_data: TenantSchema) -> Tenant:
 		existing_tenant = self.tenant_model.tenant_exists(tenant_data)
 
 		if existing_tenant:
-			raise TenantAlreadyExistsException(f"Tenant with specified data already exists")
+			raise TenantAlreadyExistsException("Tenant with specified data already exists")
 
 		return self.tenant_model.create_tenant(tenant_data)
 
@@ -45,9 +49,9 @@ class TenantService:
 
 		return self.tenant_model.delete_tenant(tenant)
 
-	def filter_tenants(self, tenant_data: FilterTenantSchema) -> List[Type[Tenant]]:
+	def search_tenants(self, tenant_data: SearchTenantSchema) -> List[Type[Tenant]]:
 		filter_data = tenant_data.model_dump()
 		if not any(filter_data.values()):
 			raise EmptyTenantFilterException("Tenant filter must have at least one value")
-      
+
 		return self.tenant_model.filter_tenants(tenant_data)
