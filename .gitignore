@@ -79,5 +79,5 @@ cython_debug/
 .pypirc
 alembic/versions/*
 /.idea/*
-base.db
+*.db
 .zed/*

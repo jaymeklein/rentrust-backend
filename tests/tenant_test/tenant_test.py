@@ -1,12 +1,11 @@
 from datetime import datetime
-from logging import Filter
 
 import pytest
 from faker import Faker
 from pydantic import ValidationError
 
 from api.models.tenant.tenant_model import TenantModel
-from api.schemas.tenant_schema import FilterTenantSchema, TenantSchema
+from api.schemas.tenant.tenant_schema import SearchTenantSchema, TenantSchema
 from db.schemas.tenant.tenant_schema import Tenant as DBTenant
 from tests.config import build_valid_tenant_data, build_invalid_tenant_data, remove_id
 
@@ -173,23 +172,23 @@ def test_filter_tenants():
 	second_tenant_schema.phone = "9876543210"
 	TENANT_MODEL.create_tenant(second_tenant_schema)
 
-	filter_tenant_schema = FilterTenantSchema(name="Doe")
+	filter_tenant_schema = SearchTenantSchema(name="Doe")
 	filtered_tenants = TENANT_MODEL.filter_tenants(filter_tenant_schema)
 	assert filtered_tenants, "Filtered tenants should exist after being inserted."
 	assert len(filtered_tenants) == 2, "Filtered tenants should have two tenants."
 
-	filtered_tenant_schema = FilterTenantSchema(email="john.doe@example.com")
+	filtered_tenant_schema = SearchTenantSchema(email="john.doe@example.com")
 	filtered_tenant = TENANT_MODEL.filter_tenants(filtered_tenant_schema)
 	assert len(filtered_tenant) == 1, "Filtered tenant should have one tenant."
 
-	filtered_tenant_schema = FilterTenantSchema(email="maria.doe@example.com")
+	filtered_tenant_schema = SearchTenantSchema(email="maria.doe@example.com")
 	filtered_tenant = TENANT_MODEL.filter_tenants(filtered_tenant_schema)
 	assert len(filtered_tenant) == 1, "Filtered tenant should have one tenant."
 
-	filtered_tenant_schema = FilterTenantSchema(phone="1234567890")
+	filtered_tenant_schema = SearchTenantSchema(phone="1234567890")
 	filtered_tenant = TENANT_MODEL.filter_tenants(filtered_tenant_schema)
 	assert len(filtered_tenant) == 1, "Filtered tenant should have one tenant."
 
-	filtered_tenant_schema = FilterTenantSchema(phone="9876543210")
+	filtered_tenant_schema = SearchTenantSchema(phone="9876543210")
 	filtered_tenant = TENANT_MODEL.filter_tenants(filtered_tenant_schema)
 	assert len(filtered_tenant) == 1, "Filtered tenant should have one tenant."

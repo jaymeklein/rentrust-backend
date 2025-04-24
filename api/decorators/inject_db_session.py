@@ -2,9 +2,10 @@ from functools import wraps
 
 from db.engine import get_session
 from tests.config import get_test_session
+from typing import Callable
 
 
-def with_session(func):
+def with_session(func) -> Callable:
 	"""Decorator to inject a database session within a class method."""
 
 	@wraps(func)
