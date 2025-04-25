@@ -1,7 +1,7 @@
 import enum
 
 
-class PropertyTypes(enum.Enum):
+class PropertyType(enum.Enum):
     # Residential
     HOUSE = 1
     APARTMENT = 2
@@ -37,7 +37,7 @@ class PropertyTypes(enum.Enum):
     OTHER = 30
 
 
-class PropertyStatuses(enum.Enum):
+class PropertyStatus(enum.Enum):
     FOR_RENT = 1
     OCCUPIED = 2
     UNDER_MAINTENANCE = 3

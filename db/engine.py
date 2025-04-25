@@ -8,7 +8,7 @@ from sqlalchemy.orm import sessionmaker, Session
 
 from db.models import SqlConnectionData
 from db.schemas.base.base import basemodel
-from db.schemas.tenant.tenant_schema import Tenant
+from db.tables import *
 
 load_dotenv()
 
