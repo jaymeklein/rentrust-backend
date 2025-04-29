@@ -21,7 +21,7 @@ class TenantModel(BaseModel):
         query = session.query(Tenant)
 
         if not get_inactive:
-            return query.filter(Tenant.status).all()
+            query = query.filter(Tenant.status)
 
         return query.all()
 

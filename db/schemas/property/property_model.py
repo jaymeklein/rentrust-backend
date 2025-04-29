@@ -1,7 +1,6 @@
 from datetime import datetime
-from sqlalchemy import Column, DateTime, Enum, Float, ForeignKey, Integer, String
+from sqlalchemy import Column, DateTime, Float, ForeignKey, Integer, String, Boolean
 from db.schemas.base.base import basemodel
-from api.utils.property_enums import PropertyStatus, PropertyType
 
 
 class Property(basemodel):
@@ -16,15 +15,12 @@ class Property(basemodel):
 	# 	Integer, ForeignKey("real_estate_companies.id"), nullable=False
 	# )
 
-	# Enum columns
-	type = Column(Enum(PropertyType), nullable=False, index=True)
-	status = Column(Enum(PropertyStatus), nullable=False, index=True)
-
 	# Main columns
-	name = Column(String, nullable=False)  # e.g. "Sunny Villa"
+	name = Column(String, nullable=False)
 	description = Column(String, nullable=False)
-	value = Column(Float, nullable=False)  # Rent value or property value
-	size_m2 = Column(Float, nullable=False)  # In M2
+	value = Column(Float, nullable=False)
+	size_m2 = Column(Float, nullable=False)
 	listed_date = Column(DateTime, default=datetime.now())
 	last_updated = Column(DateTime, onupdate=datetime.now())
 	year_built = Column(Integer)
+	is_active = Column(Boolean, default=True)
