@@ -1,13 +1,13 @@
-from colorama import Fore, Style, Back
+from colorama import Back, Fore, Style
 
 
 class BaseModel:
-	"""Base model class for all models
-	(Not database or Pydantic)"""
-	testing: bool = False
+    """The model is responsible managing external services (database, API, libraries, etc),"""
 
-	def __init__(self, **kwargs):
-		testing = kwargs.get('testing')
-		if testing:
-			print(f"     {Fore.RED}{Back.WHITE} TEST MODE IS ON {Style.RESET_ALL}")
-			self.testing = testing
+    testing: bool = False
+
+    def __init__(self, **kwargs):
+        testing = kwargs.get("testing")
+        if testing:
+            print(f"     {Fore.RED}{Back.WHITE} TEST MODE IS ON {Style.RESET_ALL}")
+            self.testing = testing

@@ -1,7 +1,5 @@
-
-
 class BaseService:
-	"""Base service class"""
+    """Services are responsible for managing business logic"""
 
-	def __init__(self, **kwargs):
-	    super().__init__(**kwargs)
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)

@@ -6,8 +6,8 @@ from fastapi import FastAPI
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator:
-	print("-- APP LIFESPAN STARTED --")
+    print("-- APP LIFESPAN STARTED --")
 
-	yield
+    yield
 
-	print("-- APP LIFESPAN ENDED --")
+    print("-- APP LIFESPAN ENDED --")

@@ -1,12 +1,16 @@
-
 from pydantic import PositiveInt
 from sqlalchemy import and_, or_
 from sqlalchemy.orm import Session
 
 from api.decorators.inject_db_session import with_session
-from api.exceptions.tenant_exceptions import TenantNotFoundException
-from api.schemas.tenant.tenant_schema import SearchTenantSchema, TenantSchema as TenantSchema, TenantDeleteResponse
 from api.models.base.base_model import BaseModel
+from api.schemas.tenant.tenant_schema import (
+    SearchTenantSchema,
+    TenantDeleteResponse,
+)
+from api.schemas.tenant.tenant_schema import (
+    TenantSchema as TenantSchema,
+)
 from db.schemas.tenant.tenant_schema import Tenant
 
 
@@ -39,12 +43,8 @@ class TenantModel(BaseModel):
 
     @with_session
     def update_tenant(
-        self, session: Session, tenant_id: PositiveInt, tenant_data: TenantSchema
+        self, session: Session, tenant: Tenant, tenant_data: TenantSchema
     ) -> Tenant | None:
-        tenant = session.query(Tenant).filter(Tenant.id == tenant_id).first()
-        if not tenant:
-            raise TenantNotFoundException(f"Tenant with id {tenant_id} not found")
-
         ignored_keys = ["id"]
         for key, value in tenant_data.__dict__.items():
             if key not in ignored_keys:
@@ -93,7 +93,7 @@ class TenantModel(BaseModel):
 
     @with_session
     def filter_tenants(
-    self, session: Session, tenant_data: SearchTenantSchema
+        self, session: Session, tenant_data: SearchTenantSchema
     ) -> list[Tenant]:
         query = session.query(Tenant)
         filters = []

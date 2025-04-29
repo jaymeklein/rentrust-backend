@@ -6,6 +6,7 @@ name = "pypi"
 [packages]
 fastapi = "*"
 alembic = "*"
+ruff = "*"
 
 [dev-packages]
 
@@ -13,6 +14,8 @@ alembic = "*"
 python_version = "3.13"
 
 [scripts]
-dev = "fastapi dev api/main.py --reload" 
+dev = "fastapi dev api/main.py --reload"
 backend = "fastapi run api/main.py --port 9013"
 tests = "pytest -vv"
+code-check = "ruff check --select I --fix api"
+code-format = "ruff format ."

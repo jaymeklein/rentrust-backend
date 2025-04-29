@@ -1,6 +1,7 @@
 from fastapi import FastAPI
-from api.routes.tenant import tenant_router
+
 from api.routes.property import property_router
+from api.routes.tenant import tenant_router
 
 app = FastAPI()
 

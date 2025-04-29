@@ -1,7 +1,5 @@
-
-
 class BaseController:
-	"""Base controller class"""
+    """Controllers are responsible for handling and converting data"""
 
-	def __init__(self, **kwargs):
-	    super().__init__(**kwargs)
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)

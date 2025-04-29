@@ -1,5 +1,3 @@
-
-
 from sqlalchemy import Column, Integer, String
 
 from db.schemas.base.base import basemodel
