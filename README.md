@@ -16,7 +16,7 @@ A real estate management backend built with FastAPI, Pydantic, and SQLAlchemy, f
 - **Well-Documented**: Code includes docstrings and type hints for clarity
 
 ## 📦 Project Structure
-```
+``` ## 
 rentrust-backend/
 ├── app/ # Main application package
 │ ├── config/ # API related configs
@@ -54,8 +54,30 @@ rentrust-backend/
    ```bash
    cp .env .env.example
    ```
+   OBS: You must set your own `PRIVATE_DB_URL` on .env
 5. **Start the application (see [scripts] on Pipfile)**
 	```bash
- 	pipenv run dev # For development
+ 	pipenv run dev # For development[Haxi](
  	pipenv run prod # For production
  	```
+
+ ## 🌐 API Documentation
+Once the application is running, interactive API documentation is automatically available at:
+
+- Swagger UI: http://localhost:8000/docs
+- ReDoc: http://localhost:8000/redoc
+
+ ## 🐱 Code Quality Assurance
+All pull requests are rigorously reviewed by Haxi (Chief Meowker Officer), who ensures:
+
+- Paw-some code readability
+- No hairball-inducing complexity
+- Cat-egorically bug-free merges
+- Proper scratching of technical debt
+  
+Warning: May nap on keyboard during critical deployments.
+
+<img src="https://github.com/user-attachments/assets/d24264de-935b-4f66-b853-6c1bbc32a94e" width="400">
+
+*(Haxi's approval = 100% more treats required)*
+
