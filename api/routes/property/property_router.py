@@ -1,8 +1,10 @@
 from typing import List
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
+from sqlalchemy.orm import Session
 
 from api.controllers.property.property_controller import PropertyController
+from db.engine import get_session
 from api.schemas.property.property_schema import (
     CreatePropertySchema,
     PropertySchema,
@@ -14,23 +16,23 @@ property_controller = PropertyController()
 
 
 @router.post(path="/", response_model=PropertySchema)
-async def create_property(property_data: CreatePropertySchema):
-    return property_controller.create_property(property_data)
+async def create_property(property_data: CreatePropertySchema, session: Session = Depends(get_session)):
+    return property_controller.create_property(session, property_data)
 
 
 @router.get(path="/", response_model=List[PropertySchema])
-async def list_properties(only_active: bool = True):
-    return property_controller.list_properties(only_active)
+async def list_properties(only_active: bool = True, session: Session = Depends(get_session)):
+    return property_controller.list_properties(session, only_active)
 
 
 @router.get(path="/{property_id}", response_model=PropertySchema)
-async def get_property(property_id):
-    return property_controller.get_property(property_id)
+async def get_property(property_id, session: Session = Depends(get_session)):
+    return property_controller.get_property(session, property_id)
 
 
 @router.patch(path="/{property_id}", response_model=PropertySchema)
-async def update_property(property_id, property_data: UpdatePropertySchema):
-    return property_controller.update_property(property_id, property_data)
+async def update_property(property_id, property_data: UpdatePropertySchema, session: Session = Depends(get_session)):
+    return property_controller.update_property(session, property_id, property_data)
 
 
 @router.delete(path="/{property_id}")

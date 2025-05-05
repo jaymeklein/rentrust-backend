@@ -3,10 +3,10 @@ from sqlalchemy.orm import relationship
 
 from db.schemas.agents.agent_model import Agent
 from db.schemas.base.base import basemodel
-from db.schemas.property.property_model import Property
+from db.schemas.property.property_schema import DBProperty
 
 
-class RealEstateCompany(basemodel):
+class DBRealestatecompany(basemodel):
     __tablename__ = "real_estate_companies"
 
     id = Column(Integer, primary_key=True, index=True)
@@ -18,4 +18,4 @@ class RealEstateCompany(basemodel):
 
     # Relationships
     agents = relationship(Agent, back_populates="company")  # Company employees
-    managed_properties = relationship(Property, back_populates="managing_company")
+    managed_properties = relationship(DBProperty, back_populates="managing_company")

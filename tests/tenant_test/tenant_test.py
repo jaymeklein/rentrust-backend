@@ -6,7 +6,7 @@ from pydantic import ValidationError
 
 from api.models.tenant.tenant_model import TenantModel
 from api.schemas.tenant.tenant_schema import SearchTenantSchema, TenantSchema
-from db.schemas.tenant.tenant_schema import Tenant as DBTenant
+from db.schemas.tenant.tenant_schema import DBTenant as DBTenant
 from tests.config import build_valid_tenant_data, build_invalid_tenant_data, remove_id
 
 TENANT_MODEL = TenantModel(testing=True)

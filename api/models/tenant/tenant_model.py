@@ -11,7 +11,7 @@ from api.schemas.tenant.tenant_schema import (
 from api.schemas.tenant.tenant_schema import (
     TenantSchema as TenantSchema,
 )
-from db.schemas.tenant.tenant_schema import Tenant
+from db.schemas.tenant.tenant_schema import DBTenant
 
 
 class TenantModel(BaseModel):
@@ -21,46 +21,40 @@ class TenantModel(BaseModel):
     @with_session
     def get_all_tenants(
         self, session: Session, get_inactive: bool = False
-    ) -> list[Tenant]:
-        query = session.query(Tenant)
+    ) -> list[DBTenant]:
+        query = session.query(DBTenant)
 
         if not get_inactive:
-            query = query.filter(Tenant.status)
+            query = query.filter(DBTenant.status)
 
         return query.all()
 
     @with_session
-    def create_tenant(self, session: Session, tenant_data: TenantSchema) -> Tenant:
-        new_tenant = Tenant(**tenant_data.__dict__)
+    def create_tenant(self, session: Session, tenant_data: TenantSchema) -> DBTenant:
+        new_tenant = DBTenant(**tenant_data.__dict__)
         session.add(new_tenant)
         session.commit()
         session.refresh(new_tenant)
         return new_tenant
 
     @with_session
-    def get_tenant(self, session: Session, tenant_id: PositiveInt) -> Tenant | None:
-        return session.query(Tenant).filter(Tenant.id == tenant_id).first()
+    def get_tenant(self, session: Session, tenant_id: PositiveInt) -> DBTenant | None:
+        return session.query(DBTenant).filter(DBTenant.id == tenant_id).first()
 
-    @with_session
     def update_tenant(
-        self, session: Session, tenant: Tenant, tenant_data: TenantSchema
-    ) -> Tenant | None:
-        ignored_keys = ["id"]
-        for key, value in tenant_data.__dict__.items():
-            if key not in ignored_keys:
-                setattr(tenant, key, value)
-
+        self, session: Session, db_tenant: DBTenant, tenant_data: DBTenant
+    ) -> DBTenant | None:
+        db_tenant.update_from_model(model=tenant_data)
         session.commit()
-        session.refresh(tenant)
-
-        return tenant
+        session.refresh(db_tenant)
+        return db_tenant
 
     @with_session
-    def delete_tenant(self, session: Session, tenant: Tenant) -> TenantDeleteResponse:
+    def delete_tenant(self, session: Session, tenant: DBTenant) -> TenantDeleteResponse:
         tenant_delete_response = TenantDeleteResponse(deleted=True)
 
         try:
-            session.query(Tenant).filter_by(id=tenant.id).delete()
+            session.query(DBTenant).filter_by(id=tenant.id).delete()
             session.commit()
             return tenant_delete_response
 
@@ -69,16 +63,15 @@ class TenantModel(BaseModel):
             tenant_delete_response.deleted = False
             return tenant_delete_response
 
-    @with_session
     def tenant_exists(
         self, session: Session, tenant_data: TenantSchema
-    ) -> list[Tenant]:
+    ) -> list[DBTenant]:
         return (
-            session.query(Tenant).filter(
+            session.query(DBTenant).filter(
                 or_(
-                    Tenant.email == tenant_data.email,
-                    Tenant.phone == tenant_data.phone,
-                    Tenant.id_document == tenant_data.id_document,
+                    DBTenant.email == tenant_data.email,
+                    DBTenant.phone == tenant_data.phone,
+                    DBTenant.id_document == tenant_data.id_document,
                 )
             )
         ).all()
@@ -88,32 +81,32 @@ class TenantModel(BaseModel):
         if not self.testing:
             raise ValueError("Cannot truncate tenants without testing mode")
 
-        session.query(Tenant).delete()
+        session.query(DBTenant).delete()
         session.commit()
 
     @with_session
     def filter_tenants(
         self, session: Session, tenant_data: SearchTenantSchema
-    ) -> list[Tenant]:
-        query = session.query(Tenant)
+    ) -> list[DBTenant]:
+        query = session.query(DBTenant)
         filters = []
 
         if tenant_data.id:
-            filters.append(Tenant.id == tenant_data.id)
+            filters.append(DBTenant.id == tenant_data.id)
 
         if tenant_data.email:
-            filters.append(Tenant.email == tenant_data.email)
+            filters.append(DBTenant.email == tenant_data.email)
 
         if tenant_data.name:
-            filters.append(Tenant.name.like(f"%{tenant_data.name}%"))
+            filters.append(DBTenant.name.like(f"%{tenant_data.name}%"))
 
         if tenant_data.id_document:
-            filters.append(Tenant.id_document == tenant_data.id_document)
+            filters.append(DBTenant.id_document == tenant_data.id_document)
 
         if tenant_data.phone:
-            filters.append(Tenant.phone == tenant_data.phone)
+            filters.append(DBTenant.phone == tenant_data.phone)
 
         if tenant_data.emergency_contact:
-            filters.append(Tenant.emergency_contact == tenant_data.emergency_contact)
+            filters.append(DBTenant.emergency_contact == tenant_data.emergency_contact)
 
         return query.filter(and_(*filters)).all()

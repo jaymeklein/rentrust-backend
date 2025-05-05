@@ -49,16 +49,14 @@ class MySQLConnection:
             bind=self._engine, future=True, expire_on_commit=False
         )
 
-    @contextmanager
-    def session(self) -> Generator[Session, None, None]:
+    def session(self) -> Session:
         """Provide a transactional scope around a series of operations."""
         session = self._session_factory()
         try:
-            yield session
-            session.commit()
-        except Exception:
+            return session
+        except Exception as e:
             session.rollback()
-            raise
+            raise e
         finally:
             session.close()
 
@@ -92,8 +90,6 @@ def start_mysql_connection(testing: bool = False) -> MySQLConnection:
 sql_connection = start_mysql_connection()
 
 
-@contextmanager
-def get_session() -> Generator[Session, None, None]:
-    """Get a database session with proper context management."""
-    with sql_connection.session() as session:
-        yield session
+def get_session() -> Generator:
+    """Get a database session"""
+    return sql_connection.session()

@@ -3,7 +3,7 @@ from sqlalchemy import Column, Integer, String
 from db.schemas.base.base import basemodel
 
 
-class Feature(basemodel):
+class DBFeature(basemodel):
     __tablename__ = "features"
 
     id = Column(Integer, primary_key=True, index=True)

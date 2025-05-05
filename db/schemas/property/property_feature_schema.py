@@ -4,7 +4,7 @@ from sqlalchemy.orm import relationship
 from db.schemas.base.base import basemodel
 
 
-class PropertyFeature(basemodel):
+class DBPropertyFeature(basemodel):
     __tablename__ = "property_features"
 
     id = Column(Integer, primary_key=True, index=True)

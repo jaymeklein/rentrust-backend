@@ -8,7 +8,7 @@ from api.schemas.property.property_schema import (
     CreatePropertySchema,
     UpdatePropertySchema,
 )
-from db.schemas.property.property_model import Property
+from db.schemas.property.property_schema import DBProperty
 
 
 class PropertyModel(BaseModel):
@@ -18,8 +18,8 @@ class PropertyModel(BaseModel):
     @with_session
     def create_property(
         self, session: Session, property_data: CreatePropertySchema
-    ) -> Property:
-        new_property = Property(**property_data.__dict__)
+    ) -> DBProperty:
+        new_property = DBProperty(**property_data.__dict__)
         session.add(new_property)
         session.commit()
         session.refresh(new_property)
@@ -28,27 +28,23 @@ class PropertyModel(BaseModel):
     @with_session
     def get_all_properties(
         self, session: Session, only_active: bool = True
-    ) -> List[Property] | None:
-        query = session.query(Property)
+    ) -> List[DBProperty] | None:
+        query = session.query(DBProperty)
 
         if only_active:
-            query = query.filter(Property.is_active)
+            query = query.filter(DBProperty.is_active)
 
         return query.all()
 
     @with_session
-    def get_property(self, session: Session, property_id: int) -> Property:
-        return session.query(Property).filter(Property.id == property_id).first()
+    def get_property(self, session: Session, property_id: int) -> DBProperty:
+        return session.query(DBProperty).filter(DBProperty.id == property_id).first()
 
     @with_session
     def update_property(
-        self, session: Session, property: Property, property_data: UpdatePropertySchema
-    ) -> Property:
-        ignored_keys = ["id"]
-        for key, value in property_data.__dict__.items():
-            if key not in ignored_keys:
-                setattr(property, key, value)
-
+        self, session: Session, property: DBProperty, property_data: UpdatePropertySchema
+    ) -> DBProperty:
+        property.update_from_model(model=property_data)
         session.commit()
         session.refresh(property)
         return property

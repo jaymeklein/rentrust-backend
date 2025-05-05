@@ -3,7 +3,7 @@ from sqlalchemy import Column, DateTime, Float, ForeignKey, Integer, String, Boo
 from db.schemas.base.base import basemodel
 
 
-class Property(basemodel):
+class DBProperty(basemodel):
     __tablename__ = "properties"
 
     # IDs

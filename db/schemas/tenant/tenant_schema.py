@@ -3,7 +3,7 @@ from sqlalchemy import Column, Integer, String, Boolean
 from db.schemas.base.base import basemodel
 
 
-class Tenant(basemodel):
+class DBTenant(basemodel):
     __tablename__ = "tenants"
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)

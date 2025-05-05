@@ -3,7 +3,7 @@ from sqlalchemy import Column, Integer, String
 from db.schemas.base.base import basemodel
 
 
-class PropertyAddress(basemodel):
+class DBPropertyAddress(basemodel):
     __tablename__ = "property_addresses"
 
     id = Column(Integer, primary_key=True, index=True)
