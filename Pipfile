@@ -32,6 +32,6 @@ python_version = "3.13"
 [scripts]
 dev = "fastapi dev api/main.py --reload"
 prod = "fastapi run api/main.py --port 9000"
-tests = "pytest -vv"
+tests = "pytest -vv" # Verbose output
 code-check = "ruff check --select I --fix api"
 code-format = "ruff format ."

@@ -3,19 +3,20 @@ from datetime import datetime
 import pytest
 from faker import Faker
 from pydantic import ValidationError
+from sqlalchemy.orm import Session
 
 from api.models.tenant.tenant_model import TenantModel
 from api.schemas.tenant.tenant_schema import SearchTenantSchema, TenantSchema
 from db.schemas.tenant.tenant_schema import DBTenant as DBTenant
-from tests.config import build_valid_tenant_data, build_invalid_tenant_data, remove_id
+from tests.config import build_valid_tenant_data, build_invalid_tenant_data, remove_id, db_session
 
 TENANT_MODEL = TenantModel(testing=True)
 fake = Faker()
 
 
 @pytest.fixture(autouse=True)
-def truncate_tenants():
-    TENANT_MODEL.truncate_tenants()
+def truncate_tenants(db_session: Session):
+    TENANT_MODEL.truncate_tenants(db_session)
 
 
 def test_create_tenant_schema():
@@ -35,11 +36,11 @@ def test_create_tenant_database_model():
     assert tenant_database_model.as_dict() == tenant_data
 
 
-def test_insert_tenant():
+def test_insert_tenant(db_session: Session):
     """Tests if the data inserted is equal to the data sent to be inserted"""
     tenant_data = build_valid_tenant_data()
     tenant_schema = TenantSchema(**tenant_data)
-    inserted_tenant = TENANT_MODEL.create_tenant(tenant_schema)
+    inserted_tenant = TENANT_MODEL.create_tenant(db_session, tenant_schema)
     inserted_tenant = remove_id(inserted_tenant.as_dict())
     tenant_data = remove_id(tenant_data)
     assert inserted_tenant == tenant_data, (
@@ -47,14 +48,14 @@ def test_insert_tenant():
     )
 
 
-def test_insert_tenant_persistence():
+def test_insert_tenant_persistence(db_session: Session):
     """Tests if the inserted tenant is persisted in the DB"""
     tenant_data = build_valid_tenant_data()
     tenant_schema = TenantSchema(**tenant_data)
     tenant_schema.email = "email@tenant.com"
     tenant_schema.id_document = str(datetime.now())
-    inserted_tenant = TENANT_MODEL.create_tenant(tenant_schema)
-    persisted_tenant = TENANT_MODEL.get_tenant(tenant_id=inserted_tenant.id)
+    inserted_tenant = TENANT_MODEL.create_tenant(db_session, tenant_schema)
+    persisted_tenant = TENANT_MODEL.get_tenant(db_session, tenant_id=inserted_tenant.id)
 
     assert persisted_tenant is not None, "Persisted tenant should not be None."
     assert inserted_tenant.id == persisted_tenant.id, (
@@ -100,7 +101,7 @@ def test_empty_name():
     )
 
 
-def test_get_all_tenants():
+def test_get_all_tenants(db_session: Session):
     """Tests for getting all tenants"""
 
     tenants = [build_valid_tenant_data(random=True) for _ in range(5)]
@@ -108,11 +109,11 @@ def test_get_all_tenants():
     created_tenants = []
 
     for tenant in tenants:
-        created_tenant = TENANT_MODEL.create_tenant(tenant)
+        created_tenant = TENANT_MODEL.create_tenant(db_session, tenant)
         created_tenants.append(created_tenant)
 
-    all_active_tenants = TENANT_MODEL.get_all_tenants()
-    all_tenants = TENANT_MODEL.get_all_tenants(get_inactive=True)
+    all_active_tenants = TENANT_MODEL.get_all_tenants(db_session)
+    all_tenants = TENANT_MODEL.get_all_tenants(db_session, get_inactive=True)
     all_active = all(set(tenant.status for tenant in all_active_tenants))
 
     assert all_active, "Should only query for active tenants."
@@ -121,21 +122,22 @@ def test_get_all_tenants():
     )
 
 
-def test_update_tenant():
+def test_update_tenant(db_session: Session):
     """Tests for updating a tenant"""
 
     tenant_data = build_valid_tenant_data()
     tenant_schema = TenantSchema(**tenant_data)
-    inserted_tenant = TENANT_MODEL.create_tenant(tenant_schema)
+    inserted_tenant = TENANT_MODEL.create_tenant(db_session, tenant_schema)
+    inserted_tenant_dict = inserted_tenant.as_dict()
 
     new_tenant_data = build_valid_tenant_data(random=True)
     new_tenant_schema = TenantSchema(**new_tenant_data)
-    updated_tenant = TENANT_MODEL.update_tenant(inserted_tenant.id, new_tenant_schema)
+    updated_tenant = TENANT_MODEL.update_tenant(db_session, inserted_tenant, new_tenant_schema)
 
     assert inserted_tenant.id == updated_tenant.id, (
         "Inserted tenant and updated tenant should have the same ID."
     )
-    assert inserted_tenant.as_dict() != updated_tenant.as_dict(), (
+    assert inserted_tenant_dict != updated_tenant.as_dict(), (
         "Inserted tenant and updated tenant should not be equal."
     )
     assert set(inserted_tenant.__dict__.keys()) == set(
@@ -143,36 +145,36 @@ def test_update_tenant():
     ), "Inserted tenant and updated tenant should have the same attributes."
 
 
-def test_delete_tenant():
+def test_delete_tenant(db_session: Session):
     """Tests for deleting a tenant"""
     tenant_data = build_valid_tenant_data()
     tenant_schema = TenantSchema(**tenant_data)
 
-    inserted_tenant = TENANT_MODEL.create_tenant(tenant_schema)
-    deleted_tenant = TENANT_MODEL.delete_tenant(inserted_tenant)
+    inserted_tenant = TENANT_MODEL.create_tenant(db_session, tenant_schema)
+    deleted_tenant = TENANT_MODEL.delete_tenant(db_session, inserted_tenant)
 
     assert deleted_tenant.deleted, "Deleted tenant should have deleted status as True."
     assert deleted_tenant.error is None, "Deleted tenant should not have any errors."
 
 
-def test_tenant_exists():
+def test_tenant_exists(db_session: Session):
     """Tests for tenant_exists method"""
     tenant_data = build_valid_tenant_data()
     tenant_schema = TenantSchema(**tenant_data)
-    TENANT_MODEL.create_tenant(tenant_schema)
+    TENANT_MODEL.create_tenant(db_session, tenant_schema)
 
-    existing_tenants = TENANT_MODEL.tenant_exists(tenant_schema)
+    existing_tenants = TENANT_MODEL.tenant_exists(db_session, tenant_schema)
     assert existing_tenants, "Tenant should exist after being inserted."
 
     invalid_tenant_data = build_valid_tenant_data(random=True)
     invalid_tenant_schema = TenantSchema(**invalid_tenant_data)
-    non_existing_tenants = TENANT_MODEL.tenant_exists(invalid_tenant_schema)
+    non_existing_tenants = TENANT_MODEL.tenant_exists(db_session, invalid_tenant_schema)
     assert not non_existing_tenants, (
         "Tenant should not exist after being inserted with invalid data."
     )
 
 
-def test_filter_tenants():
+def test_filter_tenants(db_session: Session):
     """Tests for filter_tenants method"""
     tenant_data = build_valid_tenant_data(random=True)
     tenant_schema = TenantSchema(**tenant_data)
@@ -180,32 +182,32 @@ def test_filter_tenants():
     tenant_schema.email = "john.doe@example.com"
     tenant_schema.phone = "1234567890"
 
-    TENANT_MODEL.create_tenant(tenant_schema)
+    TENANT_MODEL.create_tenant(db_session, tenant_schema)
 
     second_tenant_data = build_valid_tenant_data(random=True)
     second_tenant_schema = TenantSchema(**second_tenant_data)
     second_tenant_schema.name = "Maria Doe"
     second_tenant_schema.email = "maria.doe@example.com"
     second_tenant_schema.phone = "9876543210"
-    TENANT_MODEL.create_tenant(second_tenant_schema)
+    TENANT_MODEL.create_tenant(db_session, second_tenant_schema)
 
     filter_tenant_schema = SearchTenantSchema(name="Doe")
-    filtered_tenants = TENANT_MODEL.filter_tenants(filter_tenant_schema)
+    filtered_tenants = TENANT_MODEL.filter_tenants(db_session, filter_tenant_schema)
     assert filtered_tenants, "Filtered tenants should exist after being inserted."
     assert len(filtered_tenants) == 2, "Filtered tenants should have two tenants."
 
     filtered_tenant_schema = SearchTenantSchema(email="john.doe@example.com")
-    filtered_tenant = TENANT_MODEL.filter_tenants(filtered_tenant_schema)
+    filtered_tenant = TENANT_MODEL.filter_tenants(db_session, filtered_tenant_schema)
     assert len(filtered_tenant) == 1, "Filtered tenant should have one tenant."
 
     filtered_tenant_schema = SearchTenantSchema(email="maria.doe@example.com")
-    filtered_tenant = TENANT_MODEL.filter_tenants(filtered_tenant_schema)
+    filtered_tenant = TENANT_MODEL.filter_tenants(db_session, filtered_tenant_schema)
     assert len(filtered_tenant) == 1, "Filtered tenant should have one tenant."
 
     filtered_tenant_schema = SearchTenantSchema(phone="1234567890")
-    filtered_tenant = TENANT_MODEL.filter_tenants(filtered_tenant_schema)
+    filtered_tenant = TENANT_MODEL.filter_tenants(db_session, filtered_tenant_schema)
     assert len(filtered_tenant) == 1, "Filtered tenant should have one tenant."
 
     filtered_tenant_schema = SearchTenantSchema(phone="9876543210")
-    filtered_tenant = TENANT_MODEL.filter_tenants(filtered_tenant_schema)
+    filtered_tenant = TENANT_MODEL.filter_tenants(db_session, filtered_tenant_schema)
     assert len(filtered_tenant) == 1, "Filtered tenant should have one tenant."

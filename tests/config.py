@@ -14,7 +14,7 @@ sys.path.append(ROOT_PATH)
 
 from db.schemas.base.base import basemodel
 from db.engine import (
-    MySQLConnection,
+    get_session, MySQLConnection,
     generate_sql_connection_data,
     start_mysql_connection,
 )
@@ -32,7 +32,7 @@ def database_connection():
     basemodel.metadata.create_all(bind=sql_connection.engine)
 
     try:
-        yield session
+        return session
 
     finally:
         session.close()
@@ -43,7 +43,7 @@ def database_connection():
 @pytest.fixture
 def db_session():
     """Fixture that provides a database connection"""
-    yield from database_connection()
+    return database_connection()
 
 
 def build_valid_tenant_data(random: bool = False) -> dict:
@@ -85,12 +85,11 @@ def remove_id(data: Any) -> Any:
     del data.id
     return data
 
-
 sql_test_connection = start_mysql_connection(testing=True)
 
 
-@contextmanager
-def get_test_session() -> Generator[Session, None, None]:
-    """Get a database session with proper context management."""
-    with sql_test_connection.session() as session:
-        yield session
+@pytest.fixture
+def db_session() -> Session:
+    session = sql_test_connection.session()
+    yield session
+    session.close()

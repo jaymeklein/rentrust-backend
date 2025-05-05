@@ -2,7 +2,6 @@ from pydantic import PositiveInt
 from sqlalchemy import and_, or_
 from sqlalchemy.orm import Session
 
-from api.decorators.inject_db_session import with_session
 from api.models.base.base_model import BaseModel
 from api.schemas.tenant.tenant_schema import (
     SearchTenantSchema,
@@ -18,7 +17,6 @@ class TenantModel(BaseModel):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-    @with_session
     def get_all_tenants(
         self, session: Session, get_inactive: bool = False
     ) -> list[DBTenant]:
@@ -29,7 +27,6 @@ class TenantModel(BaseModel):
 
         return query.all()
 
-    @with_session
     def create_tenant(self, session: Session, tenant_data: TenantSchema) -> DBTenant:
         new_tenant = DBTenant(**tenant_data.__dict__)
         session.add(new_tenant)
@@ -37,7 +34,6 @@ class TenantModel(BaseModel):
         session.refresh(new_tenant)
         return new_tenant
 
-    @with_session
     def get_tenant(self, session: Session, tenant_id: PositiveInt) -> DBTenant | None:
         return session.query(DBTenant).filter(DBTenant.id == tenant_id).first()
 
@@ -49,7 +45,6 @@ class TenantModel(BaseModel):
         session.refresh(db_tenant)
         return db_tenant
 
-    @with_session
     def delete_tenant(self, session: Session, tenant: DBTenant) -> TenantDeleteResponse:
         tenant_delete_response = TenantDeleteResponse(deleted=True)
 
@@ -76,7 +71,6 @@ class TenantModel(BaseModel):
             )
         ).all()
 
-    @with_session
     def truncate_tenants(self, session: Session) -> None:
         if not self.testing:
             raise ValueError("Cannot truncate tenants without testing mode")
@@ -84,7 +78,6 @@ class TenantModel(BaseModel):
         session.query(DBTenant).delete()
         session.commit()
 
-    @with_session
     def filter_tenants(
         self, session: Session, tenant_data: SearchTenantSchema
     ) -> list[DBTenant]:
