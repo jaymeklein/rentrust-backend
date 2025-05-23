@@ -61,6 +61,16 @@ rentrust-backend/
  	pipenv run prod # For production
  	```
 
+  ## 🧪 Running Tests
+After installing the application requirements, you can run tests via:
+```bash
+pipenv run tests
+
+# Or run direcly with:
+pytest -vv
+```
+* OBS: The tests run on a volatile database, the changes don't persist after restart.
+
  ## 🌐 API Documentation
 Once the application is running, interactive API documentation is automatically available at:
 
