@@ -5,7 +5,6 @@ name = "pypi"
 
 [packages]
 alembic = "==1.15.2"
-ruff = "==0.11.7"
 annotated-types = "==0.7.0"
 anyio = "==4.9.0"
 greenlet = "==3.2.1"
@@ -32,6 +31,4 @@ python_version = "3.13"
 [scripts]
 dev = "fastapi dev api/main.py --reload"
 prod = "fastapi run api/main.py --port 9000"
-tests = "pytest -vv" # Verbose output
-code-check = "ruff check --select I --fix api"
-code-format = "ruff format ."
+tests = "pytest -vvv" # Verbose output
